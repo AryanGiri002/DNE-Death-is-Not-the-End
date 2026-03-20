@@ -1082,7 +1082,7 @@ body::after {
       <div class="guide-row"><span class="guide-tag r2">SHELLS</span><div class="guide-desc"><strong>2–4 LIVE</strong> + <strong>2–4 BLANK</strong>.</div></div>
       <div class="guide-row"><span class="guide-tag r2">ITEMS</span><div class="guide-desc"><strong>2 items each</strong>, drawn from the full item pool.</div></div>
       <div class="guide-sub">ITEMS AVAILABLE</div>
-      <div class="item-guide-row"><div class="item-icon">🔍</div><div class="item-info"><div class="item-name">MAGNIFYING GLASS</div><div class="item-desc">Reveals the next shell. Information only — shell stays. Use before deciding who to shoot.</div></div></div>
+      <div class="item-guide-row"><div class="item-icon">🔍</div><div class="item-info"><div class="item-name">MAGNIFYING GLASS</div><div class="item-desc">Reveals the current shell in the barrel. Information only — shell stays in place.</div></div></div>
       <div class="item-guide-row"><div class="item-icon">🚬</div><div class="item-info"><div class="item-name">CIGARETTE</div><div class="item-desc">Heal <strong>+1 regular HP</strong>. Cannot exceed max. Blocked if cables cut.</div></div></div>
       <div class="item-guide-row"><div class="item-icon">🥤</div><div class="item-info"><div class="item-name">SODA</div><div class="item-desc">Ejects the top shell <em>blindly</em> — cycles to the next unknown shell. Good if you know the next is bad for you.</div></div></div>
       <div class="item-guide-row"><div class="item-icon">🔗</div><div class="item-info"><div class="item-name">HANDCUFFS</div><div class="item-desc">Skip opponent's <strong>entire next turn</strong>. Devastating before a confirmed LIVE shell. Cannot stack.</div></div></div>
@@ -1277,7 +1277,7 @@ function shuffle(arr) {
 //  ITEM DEFINITIONS
 // ─────────────────────────────────────────────────
 const ITEMS = {
-  LENS: { id:'LENS', emoji:'🔍', name:'Magnifying Glass', tooltip:'Reveals the next shell in the barrel (LIVE or BLANK). The shell stays in place — information only. Use before deciding who to shoot.', restriction:'' },
+  LENS: { id:'LENS', emoji:'🔍', name:'Magnifying Glass', tooltip:'Reveals the current shell in the barrel (LIVE or BLANK). The shell stays in place — information only.', restriction:'' },
   CIGT: { id:'CIGT', emoji:'🚬', name:'Cigarette',        tooltip:'Heals you for +1 regular HP. Cannot exceed your maximum HP.', restriction:'⚠ Blocked if your cables are cut.' },
   SODA: { id:'SODA', emoji:'🥤', name:'Soda',             tooltip:"Ejects the top shell from the barrel without revealing it. You won't see what was ejected — it just cycles to the next shell.", restriction:'' },
   CUFF: { id:'CUFF', emoji:'🔗', name:'Handcuffs',        tooltip:"Cuffs the opponent — their ENTIRE next turn is skipped. Cannot stack duplicates.", restriction:'⚠ Best used right before a confirmed LIVE shell.' },
