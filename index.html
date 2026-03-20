@@ -505,7 +505,7 @@ body::after {
 .item-panel { display: none; }
 .item-panel.active { display: block; }
 .item-panel-label { font-size: 11px; color: var(--dim); letter-spacing: 2px; margin-bottom: 8px; text-align: center; }
-.item-panel-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.item-panel-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px;}
 .item-btn {
   padding: 8px 18px;
   border: 1px solid var(--border);
@@ -537,29 +537,76 @@ body::after {
 }
 .item-cancel:hover { border-color: var(--dim); color: var(--text); }
 
-.item-tooltip {
-  position: fixed;
-  bottom: 100px;
-  left: 50%;
-  transform: translateX(-50%);
-  background: var(--bg2);
-  border: 1px solid var(--gold);
+/* ── Item info box (replaces old CSS-only tooltip) ── */
+.item-info-box {
+  margin-top: 10px;
   padding: 10px 14px;
-  width: 280px;
+  border: 1px solid var(--gold);
+  background: var(--bg2);
   font-size: 12px;
   color: var(--text);
   line-height: 1.7;
-  pointer-events: none;
-  z-index: 100;
-  display: none;
-  white-space: normal;
+  min-height: 56px;
   text-align: left;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.5);
+  transition: border-color 0.15s;
 }
-.item-tooltip .tt-name { color: var(--gold); font-size: 13px; letter-spacing: 2px; margin-bottom: 6px; border-bottom: 1px dashed var(--border); padding-bottom: 4px; }
-.item-tooltip .tt-restriction { color: var(--live); font-size: 11px; margin-top: 4px; }
-.item-btn:hover .item-tooltip,
-.item-btn.focused .item-tooltip { display: block; }
+.item-info-box.empty {
+  border-color: var(--border);
+  color: var(--dim);
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.item-info-box .ib-name { color: var(--gold); font-size: 13px; letter-spacing: 2px; margin-bottom: 5px; border-bottom: 1px dashed var(--border); padding-bottom: 4px; }
+.item-info-box .ib-desc { color: var(--dim); }
+.item-info-box .ib-restriction { color: var(--live); font-size: 11px; margin-top: 4px; }
+
+/* ── Item confirmation modal ── */
+#item-confirm-modal {
+  display: none;
+  position: fixed; inset: 0;
+  background: rgba(24,26,22,0.92);
+  align-items: center; justify-content: center;
+  z-index: 300;
+}
+#item-confirm-modal.active { display: flex; }
+.item-confirm-box {
+  border: 1px solid var(--gold);
+  background: var(--bg2);
+  padding: 24px 28px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  width: min(360px, 90vw);
+}
+.item-confirm-emoji { font-size: 32px; line-height: 1; }
+.item-confirm-name { font-family: 'VT323', monospace; font-size: 26px; color: var(--gold); letter-spacing: 3px; text-align: center; }
+.item-confirm-desc { font-size: 12px; color: var(--dim); line-height: 1.7; text-align: center; padding: 0 4px; }
+.item-confirm-restriction { font-size: 11px; color: var(--live); margin-top: 2px; text-align: center; }
+.item-confirm-prompt { font-size: 11px; color: var(--text); letter-spacing: 2px; margin-top: 6px; }
+.item-confirm-btns { display: flex; gap: 12px; margin-top: 4px; width: 100%; }
+.item-confirm-btn {
+  flex: 1;
+  padding: 10px 0;
+  border: 1px solid var(--border);
+  background: transparent;
+  font-family: 'Share Tech Mono', monospace;
+  font-size: 12px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  color: var(--dim);
+}
+.item-confirm-btn.use { border-color: var(--gold); color: var(--gold); }
+.item-confirm-btn.use:hover { background: var(--gold); color: var(--bg); }
+.item-confirm-btn.cancel-use { border-color: var(--border); }
+.item-confirm-btn.cancel-use:hover { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+@media (max-width: 600px) {
+  .item-confirm-btn { padding: 14px 0; font-size: 13px; min-height: 48px; }
+}
 
 .kbd-hint { text-align: center; font-size: 11px; color: var(--border); margin-top: 7px; letter-spacing: 1px; }
 
@@ -693,11 +740,12 @@ body::after {
   .menu-opt { width: 100%; }
 
   .turn-banner {
-    height: 50px;
-    font-size: 32px;
-    letter-spacing: 5px;
+    height: 44px;
+    font-size: 20px;
+    letter-spacing: 3px;
   }
-  .turn-level-label { font-size: 13px; right: 10px; }
+  .turn-arrow { font-size: 14px; }
+  .turn-level-label { font-size: 11px; right: 10px; }
   .back-btn {
     padding: 6px 10px;
     font-size: 11px;
@@ -760,15 +808,7 @@ body::after {
     margin-top: 8px;
   }
 
-  .item-tooltip {
-    position: fixed;
-    bottom: 140px;
-    left: 12px;
-    right: 12px;
-    width: auto;
-    transform: none;
-    font-size: 12px;
-  }
+  .item-info-box { font-size: 12px; }
 
   .kbd-hint { display: none; }
 
@@ -1128,6 +1168,7 @@ body::after {
 
     <div class="item-panel" id="item-panel">
       <div class="item-panel-label">— SELECT ITEM —</div>
+      <div class="item-info-box empty" id="item-info-box">hover or tap an item to see its effect</div>
       <div class="item-panel-btns" id="item-btns"></div>
       <button class="item-cancel" id="btn-cancel">← CANCEL</button>
     </div>
@@ -1147,6 +1188,21 @@ body::after {
 <div id="level-intro">
   <div class="intro-big" id="intro-big">LEVEL 1</div>
   <div class="intro-small" id="intro-small"></div>
+</div>
+
+<!-- ══ ITEM CONFIRM MODAL ══ -->
+<div id="item-confirm-modal">
+  <div class="item-confirm-box">
+    <div class="item-confirm-emoji" id="ic-emoji">🔍</div>
+    <div class="item-confirm-name" id="ic-name">ITEM NAME</div>
+    <div class="item-confirm-desc" id="ic-desc"></div>
+    <div class="item-confirm-restriction" id="ic-restriction"></div>
+    <div class="item-confirm-prompt">USE THIS ITEM?</div>
+    <div class="item-confirm-btns">
+      <button class="item-confirm-btn use" id="ic-yes">✓ USE IT</button>
+      <button class="item-confirm-btn cancel-use" id="ic-no">✕ CANCEL</button>
+    </div>
+  </div>
 </div>
 
 <!-- ══ CONFIRM MODAL ══ -->
@@ -1605,24 +1661,86 @@ function showItemActions() {
   $('main-btns').style.display = 'none';
   $('item-panel').classList.add('active');
   $('action-label').textContent = 'USE ITEM';
+
+  // Reset info box
+  const infoBox = $('item-info-box');
+  infoBox.className = 'item-info-box empty';
+  infoBox.innerHTML = 'hover or tap an item to see its effect';
+
   const btns = $('item-btns');
   btns.innerHTML = '';
   G.player.items.forEach((id, idx) => {
     const it = ITEMS[id];
     const btn = document.createElement('button');
     btn.className = 'item-btn';
+    btn.dataset.id = id;
     btn.dataset.idx = idx;
-    btn.innerHTML = `${it.emoji} ${it.name}<div class="item-tooltip"><div class="tt-name">${it.emoji} ${it.name}</div>${it.tooltip}${it.restriction ? '<div class="tt-restriction">'+it.restriction+'</div>' : ''}</div>`;
-    btn.onclick = () => { if (!G.inputLocked) confirmUseItem(id, idx); };
+    btn.innerHTML = `${it.emoji} ${it.name}`;
+
+    // Desktop: hover shows info box
+    btn.addEventListener('mouseenter', () => {
+      showItemInfo(id);
+    });
+    btn.addEventListener('mouseleave', () => {
+      // Only clear if nothing is focused / selected
+      if (!btns.querySelector('.item-btn.focused')) {
+        infoBox.className = 'item-info-box empty';
+        infoBox.innerHTML = 'hover or tap an item to see its effect';
+      }
+    });
+
+    // Click / tap: first tap on mobile shows info, second tap (or any click on desktop) opens confirm
+    btn.onclick = (e) => {
+      if (G.inputLocked) return;
+      haptic.tap();
+      // On touch devices, first interaction just shows info if not already focused on this btn
+      if (!btn.classList.contains('focused')) {
+        // Update focus to this button
+        [...btns.querySelectorAll('.item-btn')].forEach(b => b.classList.remove('focused'));
+        btn.classList.add('focused');
+        G.itemFocus = idx;
+        showItemInfo(id);
+        return; // first tap = show info only
+      }
+      // Already focused (second tap) or desktop click — open confirm modal
+      openItemConfirm(id, idx);
+    };
+
     btns.appendChild(btn);
   });
-  G.itemFocus = 0;
-  updateItemFocus();
+  G.itemFocus = -1; // nothing focused yet
+}
+
+function showItemInfo(id) {
+  const it = ITEMS[id];
+  const box = $('item-info-box');
+  box.className = 'item-info-box';
+  box.innerHTML =
+    `<div class="ib-name">${it.emoji} ${it.name}</div>` +
+    `<div class="ib-desc">${it.tooltip}</div>` +
+    (it.restriction ? `<div class="ib-restriction">${it.restriction}</div>` : '');
+}
+
+let _pendingItemId = null, _pendingItemIdx = null;
+
+function openItemConfirm(id, idx) {
+  haptic.confirm();
+  _pendingItemId = id;
+  _pendingItemIdx = idx;
+  const it = ITEMS[id];
+  $('ic-emoji').textContent = it.emoji;
+  $('ic-name').textContent = it.name.toUpperCase();
+  $('ic-desc').textContent = it.tooltip;
+  $('ic-restriction').textContent = it.restriction || '';
+  $('item-confirm-modal').classList.add('active');
 }
 
 function updateItemFocus() {
   const btns = [...$('item-btns').querySelectorAll('.item-btn')];
   btns.forEach((b,i) => b.classList.toggle('focused', i===G.itemFocus));
+  if (G.itemFocus >= 0 && G.itemFocus < G.player.items.length) {
+    showItemInfo(G.player.items[G.itemFocus]);
+  }
 }
 
 // ─────────────────────────────────────────────────
@@ -1630,6 +1748,7 @@ function updateItemFocus() {
 // ─────────────────────────────────────────────────
 async function confirmUseItem(id, idx) {
   if (G.inputLocked) return;
+  $('item-confirm-modal').classList.remove('active');
   haptic.confirm();
   G.inputLocked = true;
   removeItem(G.player, id);
@@ -2011,6 +2130,15 @@ $('single-back').addEventListener('click', () => { haptic.back(); showScreen('me
 $('btn-dealer').addEventListener('click', () => { if (!G?.inputLocked) playerShoot('dealer'); });
 $('btn-self').addEventListener('click',   () => { if (!G?.inputLocked) playerShoot('player'); });
 $('btn-item').addEventListener('click',   () => { if (!G?.inputLocked) showItemActions(); });
+$('ic-yes').addEventListener('click', () => {
+  if (_pendingItemId !== null) confirmUseItem(_pendingItemId, _pendingItemIdx);
+});
+$('ic-no').addEventListener('click', () => {
+  haptic.back();
+  $('item-confirm-modal').classList.remove('active');
+  _pendingItemId = null; _pendingItemIdx = null;
+});
+
 $('btn-cancel').addEventListener('click', () => { if (!G?.inputLocked) { haptic.back(); showMainActions(); } });
 
 $('game-back-btn').addEventListener('click', () => {
@@ -2037,6 +2165,13 @@ $('end-play-again').addEventListener('click', () => { haptic.tap(); G=null; show
 // ─────────────────────────────────────────────────
 document.addEventListener('keydown', e => {
   const key = e.key;
+
+  // Item confirm modal takes priority over all
+  if ($('item-confirm-modal').classList.contains('active')) {
+    if (key==='Enter'||key==='y'||key==='Y') $('ic-yes').click();
+    if (key==='Escape'||key==='n'||key==='N') $('ic-no').click();
+    return;
+  }
 
   if ($('confirm-modal').classList.contains('active')) {
     if (key==='Enter'||key==='y'||key==='Y') $('confirm-yes').click();
@@ -2074,9 +2209,12 @@ document.addEventListener('keydown', e => {
       if (key==='3') $('btn-item').click();
     } else {
       const btns = [...$('item-btns').querySelectorAll('.item-btn')];
-      if (key==='ArrowLeft')  { G.itemFocus=(G.itemFocus-1+btns.length)%btns.length; updateItemFocus(); }
+      if (key==='ArrowLeft')  { G.itemFocus=(G.itemFocus <= 0 ? btns.length-1 : G.itemFocus-1); updateItemFocus(); }
       if (key==='ArrowRight') { G.itemFocus=(G.itemFocus+1)%btns.length; updateItemFocus(); }
-      if (key==='Enter') btns[G.itemFocus]?.click();
+      if (key==='Enter' && G.itemFocus >= 0) {
+        const id = G.player.items[G.itemFocus];
+        if (id) openItemConfirm(id, G.itemFocus);
+      }
     }
     return;
   }
