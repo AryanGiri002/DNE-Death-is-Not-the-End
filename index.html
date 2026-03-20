@@ -200,6 +200,19 @@ body::after {
 /* MENU tab only exists in the mobile dock — hide on desktop */
 .guide-tab[data-tab="menu"] { display: none; }
 
+@keyframes loreGlow {
+  0%, 100% { outline: 1px solid rgba(217,85,64,0.7); box-shadow: inset 0 0 6px rgba(217,85,64,0.2), 0 0 8px rgba(217,85,64,0.5); color: var(--live); }
+  50%       { outline: 1px solid #f07050;              box-shadow: inset 0 0 10px rgba(217,85,64,0.35), 0 0 18px rgba(217,85,64,0.9); color: #f07050; }
+}
+/* Pulse only renders on mobile — desktop override below */
+.guide-tab.lore-pulse { animation: none; }
+
+@media (max-width: 600px) {
+  .guide-tab.lore-pulse { animation: loreGlow 1.4s ease-in-out infinite; }
+  /* Explicit reset so outline doesn't linger after class removal */
+  .guide-tab:not(.lore-pulse) { outline: none; box-shadow: none; }
+}
+
 .guide-panel { display: none; }
 .guide-panel.active { display: block; }
 
@@ -1827,17 +1840,17 @@ async function resolveShot(shooter, target) {
         if (G.orbCharge >= 3) { G.orbStabilized = true; haptic.orbFull(); log('★ ORB STABILIZED! LIVE shells now trigger RESURRECTION.', 'orb'); }
         updateUI();
         await sleep(500);
-        // Blank on player = shooter keeps their turn
+        // Self-blank = keep turn; opponent-blank = pass turn
         if (shooter === 'player') { G.inputLocked = false; showMainActions(); updateUI(); }
-        else await dealerTurn();
+        else { G.playerTurn = true; G.inputLocked = false; updateUI(); playerTurn(); }
       } else if (hitsPlayer && G.orbStabilized) {
         haptic.blank();
-        log('○ BLANK — Orb stabilized, awaiting LIVE. You keep your turn.', 'blank');
+        log('○ BLANK — Orb stabilized, awaiting LIVE.', 'blank');
         flash('player-zone', 'blank');
         updateUI();
         await sleep(400);
         if (shooter === 'player') { G.inputLocked = false; showMainActions(); updateUI(); }
-        else await dealerTurn();
+        else { G.playerTurn = true; G.inputLocked = false; updateUI(); playerTurn(); }
       } else {
         // Blank hits dealer (dealer shot itself) — no orb effect, dealer keeps turn
         haptic.blank();
@@ -2189,8 +2202,15 @@ function showDock() {
 
 // Wire dock tab clicks
 document.querySelectorAll('.guide-tab').forEach(btn => {
-  btn.addEventListener('click', () => switchDockTab(btn.dataset.tab));
+  btn.addEventListener('click', () => {
+    // Remove pulse on first tab interaction
+    document.querySelector('.guide-tab.lore-pulse')?.classList.remove('lore-pulse');
+    switchDockTab(btn.dataset.tab);
+  });
 });
+
+// Start LORE tab pulsing
+document.querySelector('.guide-tab[data-tab="lore"]')?.classList.add('lore-pulse');
 
 // Re-init on resize (e.g. rotate) so layout mode is re-applied cleanly
 window.addEventListener('resize', () => {
