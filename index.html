@@ -189,6 +189,9 @@ body::after {
 .guide-tab:hover { border-color: var(--text); color: var(--text); }
 .guide-tab.active { background: var(--accent); color: var(--bg); border-color: var(--accent); }
 
+/* MENU tab only exists in the mobile dock — hide on desktop */
+.guide-tab[data-tab="menu"] { display: none; }
+
 .guide-panel { display: none; }
 .guide-panel.active { display: block; }
 
@@ -495,6 +498,11 @@ body::after {
   color: #fff;
   border-color: var(--live);
 }
+.act-btn.shoot-self {
+  background: var(--blank);
+  color: #fff;
+  border-color: var(--blank);
+}
 .act-btn.shoot-self:hover, .act-btn.shoot-self.focused {
   background: var(--blank);
   color: #fff;
@@ -505,7 +513,7 @@ body::after {
 .item-panel { display: none; }
 .item-panel.active { display: block; }
 .item-panel-label { font-size: 11px; color: var(--dim); letter-spacing: 2px; margin-bottom: 8px; text-align: center; }
-.item-panel-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 8px;}
+.item-panel-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 .item-btn {
   padding: 8px 18px;
   border: 1px solid var(--border);
@@ -707,110 +715,143 @@ body::after {
 
   body { font-size: 13px; }
 
-  #menu-screen { flex-direction: column; overflow-y: auto; }
+  /* Menu screen: full-height sliding panel container */
+  #menu-screen {
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    height: 100dvh;
+  }
 
+  /* menu-left = MENU slide panel (index 0) */
   .menu-left {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    bottom: 54px;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
     width: 100%;
     min-width: unset;
     border-right: none;
-    border-bottom: 1px dashed var(--border);
-    padding: 24px 20px 16px;
-    justify-content: flex-start;
+    border-bottom: none;
+    padding: 28px 20px;
+    justify-content: center;
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform;
+    background: var(--bg);
+    z-index: 2;
   }
+
+  /* clip container for guide panels */
+  .menu-right {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    bottom: 54px;
+    overflow: hidden;
+    padding: 0;
+  }
+
+  /* each guide panel is a slide */
+  .guide-panel {
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 14px 16px 20px;
+    display: block !important;
+    transition: transform 0.32s cubic-bezier(0.4,0,0.2,1);
+    will-change: transform;
+    background: var(--bg);
+    transform: translateX(100%);
+  }
+  .guide-panel.mobile-active  { transform: translateX(0); }
+  .guide-panel.mobile-behind  { transform: translateX(-100%); }
+
+  /* persistent bottom dock */
+  .guide-tabs {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 54px;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 0;
+    background: var(--bg2);
+    border-top: 1px solid var(--border);
+    z-index: 50;
+    padding: 0; margin: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+    transition: transform 0.28s ease, opacity 0.28s ease;
+  }
+  .guide-tabs::-webkit-scrollbar { display: none; }
+  .guide-tabs.dock-hidden {
+    transform: translateY(100%);
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .guide-tab {
+    flex: 1;
+    min-width: 44px;
+    padding: 6px 2px;
+    font-size: 10px;
+    letter-spacing: 0;
+    border: none;
+    border-right: 1px solid var(--border);
+    border-radius: 0;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
+  .guide-tab:last-child { border-right: none; }
+  .guide-tab.active { background: var(--accent); color: var(--bg); border-color: transparent; }
+  /* Re-show and style the MENU tab only on mobile */
+  .guide-tab[data-tab="menu"] { display: flex; color: var(--gold); }
+  .guide-tab[data-tab="menu"].active { background: var(--gold); color: var(--bg); }
 
   .title-art { font-size: clamp(52px, 18vw, 80px); }
 
-  .menu-opts { margin-top: 14px; gap: 10px; }
-  .menu-opt {
-    padding: 16px 18px;
-    font-size: 14px;
-  }
-
+  .menu-opts { margin-top: 14px; gap: 10px; width: 100%; }
+  .menu-opt { padding: 16px 18px; font-size: 14px; }
   .press-enter { margin-top: 12px; font-size: 12px; }
 
-  .menu-right { padding: 14px 16px; }
-
-  .guide-tabs { flex-wrap: wrap; gap: 6px; }
-  .guide-tab {
-    padding: 8px 14px;
-    font-size: 12px;
-  }
-
   #single-opts { width: 100%; padding: 0 20px; }
-  .menu-opt { width: 100%; }
 
-  .turn-banner {
-    height: 44px;
-    font-size: 20px;
-    letter-spacing: 3px;
-  }
+  .turn-banner { height: 44px; font-size: 20px; letter-spacing: 3px; }
   .turn-arrow { font-size: 14px; }
   .turn-level-label { font-size: 11px; right: 10px; }
-  .back-btn {
-    padding: 6px 10px;
-    font-size: 11px;
-    left: 8px;
-  }
+  .back-btn { padding: 6px 10px; font-size: 11px; left: 8px; }
 
-  .dealer-zone, .player-zone {
-    padding: 8px 12px;
-    min-height: 70px;
-  }
+  .dealer-zone, .player-zone { padding: 8px 12px; min-height: 70px; }
   .entity-label { font-size: 11px; letter-spacing: 3px; margin-bottom: 3px; }
   .heart { font-size: 17px; }
   .items-row { font-size: 11px; }
-  .item-tag {
-    padding: 4px 8px;
-    font-size: 11px;
-    margin: 2px 2px;
-  }
+  .item-tag { padding: 4px 8px; font-size: 11px; margin: 2px 2px; }
   .item-tag .it-icon { font-size: 13px; }
 
   .shotgun-zone { padding: 6px 12px; }
   .shell-pip { width: 16px; height: 16px; }
   .shell-counts { font-size: 12px; }
 
-  .log-zone {
-    padding: 8px 12px;
-    font-size: 12px;
-    line-height: 1.7;
-  }
+  .log-zone { padding: 8px 12px; font-size: 12px; line-height: 1.7; }
 
-  .action-zone {
-    padding: 10px 12px 14px;
-    min-height: unset;
-    border-top: 2px solid var(--border);
-  }
+  .action-zone { padding: 10px 12px 14px; min-height: unset; border-top: 2px solid var(--border); }
   .action-label { font-size: 10px; margin-bottom: 8px; letter-spacing: 3px; }
 
   .main-btns { gap: 8px; }
-  .act-btn {
-    padding: 16px 0;
-    flex: 1;
-    font-size: 13px;
-    letter-spacing: 0;
-    min-height: 54px;
-  }
+  .act-btn { padding: 16px 0; flex: 1; font-size: 13px; letter-spacing: 0; min-height: 54px; }
 
   .item-panel-btns { gap: 8px; }
-  .item-btn {
-    padding: 14px 16px;
-    font-size: 12px;
-    min-height: 52px;
-    flex: 1;
-    min-width: 120px;
-  }
-  .item-cancel {
-    padding: 12px 24px;
-    font-size: 12px;
-    min-height: 44px;
-    width: 100%;
-    margin-top: 8px;
-  }
+  .item-btn { padding: 14px 16px; font-size: 12px; min-height: 52px; flex: 1; min-width: 120px; }
+  .item-cancel { padding: 12px 24px; font-size: 12px; min-height: 44px; width: 100%; margin-top: 8px; }
 
   .item-info-box { font-size: 12px; }
-
-  .kbd-hint { display: none; }
 
   .confirm-box { padding: 24px 20px; width: 90vw; }
   .confirm-btn { padding: 14px 20px; font-size: 13px; flex: 1; }
@@ -924,10 +965,11 @@ body::after {
 
   <div class="menu-right">
     <div class="guide-tabs" id="guide-tabs">
-      <button class="guide-tab active" data-tab="lore">LORE</button>
-      <button class="guide-tab" data-tab="r1">R1</button>
-      <button class="guide-tab" data-tab="r2">R2</button>
-      <button class="guide-tab" data-tab="r3">R3</button>
+      <button class="guide-tab active" data-tab="menu">MENU</button>
+      <button class="guide-tab" data-tab="lore">LORE</button>
+      <button class="guide-tab" data-tab="r1">L1</button>
+      <button class="guide-tab" data-tab="r2">L2</button>
+      <button class="guide-tab" data-tab="r3">L3</button>
       <button class="guide-tab" data-tab="r4">GHOST</button>
       <button class="guide-tab" data-tab="rules">RULES</button>
     </div>
@@ -1168,8 +1210,8 @@ body::after {
 
     <div class="item-panel" id="item-panel">
       <div class="item-panel-label">— SELECT ITEM —</div>
-      <div class="item-info-box empty" id="item-info-box">hover or tap an item to see its effect</div>
       <div class="item-panel-btns" id="item-btns"></div>
+      <div class="item-info-box empty" id="item-info-box">hover or tap an item to see its effect</div>
       <button class="item-cancel" id="btn-cancel">← CANCEL</button>
     </div>
 
@@ -2078,16 +2120,118 @@ async function startGame(mode, singleLevel=1) {
   await startLevel(startLevelNum);
 }
 
-// Guide tabs
-document.querySelectorAll('.guide-tab').forEach(btn => {
-  btn.addEventListener('click', () => {
-    haptic.tap();
+// ─────────────────────────────────────────────────
+//  GUIDE DOCK / TAB SYSTEM
+// ─────────────────────────────────────────────────
+const DOCK_TABS = ['menu', 'lore', 'r1', 'r2', 'r3', 'r4', 'rules'];
+let currentDockTab = 'lore'; // desktop default; mobile init overrides to 'menu'
+
+function isMobileLayout() {
+  return window.innerWidth <= 600;
+}
+
+function initDockPanels() {
+  if (!isMobileLayout()) {
+    // Desktop: classic show/hide, LORE active by default
+    document.querySelectorAll('.guide-panel').forEach(p => p.classList.remove('active', 'mobile-active', 'mobile-behind'));
+    document.querySelectorAll('.guide-tab').forEach(b => b.classList.remove('active'));
+    $('tab-lore').classList.add('active');
+    document.querySelector('.guide-tab[data-tab="lore"]').classList.add('active');
+    currentDockTab = 'lore';
+    return;
+  }
+
+  // Mobile: menu-left is panel 0, visible; all guide panels off-screen right
+  const menuLeft = document.querySelector('.menu-left');
+  menuLeft.style.transition = 'none';
+  menuLeft.style.transform = 'translateX(0)';
+  void menuLeft.offsetWidth;
+  menuLeft.style.transition = '';
+
+  document.querySelectorAll('.guide-panel').forEach(p => {
+    p.style.transition = 'none';
+    p.classList.remove('mobile-active', 'mobile-behind', 'active');
+    p.style.transform = 'translateX(100%)';
+    void p.offsetWidth;
+    p.style.transition = '';
+  });
+
+  document.querySelectorAll('.guide-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === 'menu');
+  });
+  currentDockTab = 'menu';
+}
+
+function switchDockTab(newTab) {
+  if (newTab === currentDockTab) return;
+  haptic.tap();
+
+  const oldIdx = DOCK_TABS.indexOf(currentDockTab);
+  const newIdx = DOCK_TABS.indexOf(newTab);
+  const goRight = newIdx > oldIdx;
+
+  function getPanel(tab) {
+    return tab === 'menu' ? document.querySelector('.menu-left') : $('tab-' + tab);
+  }
+
+  const oldPanel = getPanel(currentDockTab);
+  const newPanel = getPanel(newTab);
+
+  if (!isMobileLayout()) {
+    // Desktop: simple show/hide (skip 'menu' tab — menu-left always visible)
     document.querySelectorAll('.guide-tab').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.guide-panel').forEach(p => p.classList.remove('active'));
-    btn.classList.add('active');
-    $('tab-' + btn.dataset.tab).classList.add('active');
+    document.querySelector(`.guide-tab[data-tab="${newTab}"]`).classList.add('active');
+    if (newTab !== 'menu') newPanel.classList.add('active');
+    currentDockTab = newTab;
+    return;
+  }
+
+  // ── Mobile: sliding animation ──────────────────────────────
+  // 1. Snap new panel to its entry edge (no animation)
+  newPanel.style.transition = 'none';
+  newPanel.style.transform = goRight ? 'translateX(100%)' : 'translateX(-100%)';
+  newPanel.classList.remove('mobile-active', 'mobile-behind');
+  void newPanel.offsetWidth; // force reflow
+
+  // 2. Animate both panels
+  newPanel.style.transition = '';
+  newPanel.style.transform = 'translateX(0)';
+  newPanel.classList.add('mobile-active');
+
+  oldPanel.style.transition = '';
+  oldPanel.style.transform = goRight ? 'translateX(-100%)' : 'translateX(100%)';
+  oldPanel.classList.remove('mobile-active');
+
+  // 3. Update dock highlight
+  document.querySelectorAll('.guide-tab').forEach(b => {
+    b.classList.toggle('active', b.dataset.tab === newTab);
   });
+  currentDockTab = newTab;
+}
+
+function hideDock() {
+  $('guide-tabs').classList.add('dock-hidden');
+}
+function showDock() {
+  $('guide-tabs').classList.remove('dock-hidden');
+  initDockPanels();
+}
+
+// Wire dock tab clicks
+document.querySelectorAll('.guide-tab').forEach(btn => {
+  btn.addEventListener('click', () => switchDockTab(btn.dataset.tab));
 });
+
+// Re-init on resize (e.g. rotate) so layout mode is re-applied cleanly
+window.addEventListener('resize', () => {
+  if ($('menu-screen').classList.contains('active') && !G) {
+    initDockPanels();
+  }
+});
+
+// Init on load
+initDockPanels();
 
 // ─────────────────────────────────────────────────
 //  MENU NAV STATE
@@ -2113,6 +2257,7 @@ $('menu-opts').querySelectorAll('.menu-opt').forEach((btn,i) => {
     haptic.tap();
     menuIdx = i;
     const mode = btn.dataset.mode;
+    hideDock();
     if (mode==='single') { showScreen('single'); return; }
     startGame(mode);
   });
@@ -2122,10 +2267,11 @@ $('single-opts').querySelectorAll('.menu-opt').forEach((btn,i) => {
   btn.addEventListener('click', () => {
     haptic.confirm();
     singleIdx = i;
+    hideDock();
     startGame('single', parseInt(btn.dataset.level));
   });
 });
-$('single-back').addEventListener('click', () => { haptic.back(); showScreen('menu'); });
+$('single-back').addEventListener('click', () => { haptic.back(); showDock(); showScreen('menu'); });
 
 $('btn-dealer').addEventListener('click', () => { if (!G?.inputLocked) playerShoot('dealer'); });
 $('btn-self').addEventListener('click',   () => { if (!G?.inputLocked) playerShoot('player'); });
@@ -2151,6 +2297,7 @@ $('confirm-yes').addEventListener('click', () => {
   G = null;
   $('level-intro').classList.remove('active');
   clearLog();
+  showDock();
   showScreen('menu');
 });
 $('confirm-no').addEventListener('click', () => {
@@ -2158,7 +2305,7 @@ $('confirm-no').addEventListener('click', () => {
   $('confirm-modal').classList.remove('active');
 });
 
-$('end-play-again').addEventListener('click', () => { haptic.tap(); G=null; showScreen('menu'); });
+$('end-play-again').addEventListener('click', () => { haptic.tap(); G=null; showDock(); showScreen('menu'); });
 
 // ─────────────────────────────────────────────────
 //  KEYBOARD
