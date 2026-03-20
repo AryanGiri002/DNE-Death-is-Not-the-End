@@ -160,6 +160,14 @@ body::after {
 }
 @keyframes blink { 50% { opacity: 0; } }
 
+.made-by {
+  font-size: 10px;
+  color: var(--dim);
+  letter-spacing: 2px;
+  margin-top: 14px;
+  opacity: 0.5;
+}
+
 .menu-right {
   flex: 1;
   overflow-y: auto;
@@ -946,6 +954,7 @@ body::after {
       <button class="menu-opt" data-mode="ghost">► GHOST MODE (Level 4)</button>
     </div>
     <div class="press-enter">► PRESS ENTER TO PLAY ◄</div>
+    <div class="made-by">made by Aryan Giri</div>
   </div>
 
   <div class="menu-right">
@@ -1803,31 +1812,45 @@ async function resolveShot(shooter, target) {
 
   } else {
     // BLANK
-    const isSelfShot = target === shooter || (target === 'player' && shooter === 'player') || (target === 'dealer' && shooter === 'dealer');
+    const isSelfShot = target === shooter;
+
+    if (G.level === 4) {
+      // Orb charges only when a BLANK hits the PLAYER
+      // (player shoots self OR dealer shoots player with blank)
+      const hitsPlayer = target === 'player';
+
+      if (hitsPlayer && !G.orbStabilized) {
+        G.orbCharge++;
+        haptic.orbCharge();
+        flash('player-zone', 'blank');
+        log(`○ BLANK absorbed by Orb. Charge: ${G.orbCharge}/3.`, 'orb');
+        if (G.orbCharge >= 3) { G.orbStabilized = true; haptic.orbFull(); log('★ ORB STABILIZED! LIVE shells now trigger RESURRECTION.', 'orb'); }
+        updateUI();
+        await sleep(500);
+        // Blank on player = shooter keeps their turn
+        if (shooter === 'player') { G.inputLocked = false; showMainActions(); updateUI(); }
+        else await dealerTurn();
+      } else if (hitsPlayer && G.orbStabilized) {
+        haptic.blank();
+        log('○ BLANK — Orb stabilized, awaiting LIVE. You keep your turn.', 'blank');
+        flash('player-zone', 'blank');
+        updateUI();
+        await sleep(400);
+        if (shooter === 'player') { G.inputLocked = false; showMainActions(); updateUI(); }
+        else await dealerTurn();
+      } else {
+        // Blank hits dealer (dealer shot itself) — no orb effect, dealer keeps turn
+        haptic.blank();
+        log('○ BLANK — Dealer is unharmed. Dealer keeps turn.', 'blank');
+        flash('dealer-zone', 'blank');
+        updateUI();
+        await sleep(450);
+        await dealerTurn();
+      }
+      return;
+    }
 
     if (isSelfShot) {
-      if (G.level === 4) {
-        if (!G.orbStabilized) {
-          G.orbCharge++;
-          haptic.orbCharge();
-          flash('player-zone','blank');
-          log(`○ BLANK absorbed by Orb. Charge: ${G.orbCharge}/3.`, 'orb');
-          if (G.orbCharge >= 3) { G.orbStabilized = true; haptic.orbFull(); log('★ ORB STABILIZED! LIVE shells now trigger RESURRECTION.', 'orb'); }
-          updateUI();
-          await sleep(500);
-          if (shooter==='player') { G.inputLocked=false; showMainActions(); updateUI(); }
-          else await dealerTurn();
-        } else {
-          haptic.blank();
-          log('○ BLANK — Orb already stabilized. Shooter keeps turn.', 'blank');
-          flash('player-zone','blank');
-          updateUI();
-          await sleep(400);
-          if (shooter==='player') { G.inputLocked=false; showMainActions(); updateUI(); }
-          else await dealerTurn();
-        }
-        return;
-      }
       haptic.blank();
       const keeperName = shooter==='player' ? 'You keep' : 'Dealer keeps';
       log(`○ Click. BLANK — ${keeperName} their turn.`, 'blank');
